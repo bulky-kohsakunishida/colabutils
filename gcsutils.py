@@ -1,16 +1,23 @@
 import os
+import zipfile
 from google.colab import auth
+from google.cloud import storage
 
 def GCS_download(PROJECT_ID, BUCKET_NAME, DATASET_PATH, DATASET_NAME):
     if not os.path.exists(DATASET_NAME + '.zip'):
+
         # 認証
         auth.authenticate_user()
 
         # Google Cloud Storage からデータセットと学習済モデルをコピーし、データセット展開する
-        !gcloud config set project {PROJECT_ID}
+        client = storage.Client()
+        bucket = client.bucket(BUCKET_NAME)
+        blob = bucket.blob(os.path.join(DATASET_PATH, DATASET_NAME) + ".zip")
 
-        !gsutil cp gs://{BUCKET_NAME}/{DATASET_PATH}/{DATASET_NAME}.zip {DATASET_NAME}.zip
-        !unzip {DATASET_NAME}.zip > /dev/null
+        blob.download_to_filename(os.path.join(DATASET_PATH, DATASET_NAME) + ".zip")
+
+        with zipfile.ZipFile(DATASET_NAME + '.zip') as zf:
+            zf.extractall()
 
 def GCS_upload(WORK_NAME, BUCKET_NAME, WEIGHT_PATH):
     RESULTS_DIR = 'output'
@@ -40,4 +47,8 @@ def GCS_upload(WORK_NAME, BUCKET_NAME, WEIGHT_PATH):
     model_name = "output/model_final.pth"
     if os.path.exists(model_name):
         print('save weight file :gs://{}/{}/{}'.format(BUCKET_NAME, WEIGHT_PATH, WEIGHT_NAME))
-        !gsutil cp {model_name} gs://{BUCKET_NAME} / {WEIGHT_PATH} / {WEIGHT_NAME}
+
+        client = storage.Client()
+        bucket = client.bucket(BUCKET_NAME)
+        blob = bucket.blob(os.path.join(WEIGHT_PATH, WEIGHT_NAME))
+        blob.upload_from_filename(WEIGHT_NAME)
