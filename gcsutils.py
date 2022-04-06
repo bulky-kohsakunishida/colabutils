@@ -16,7 +16,11 @@ class GCS_utils:
                 with zipfile.ZipFile(local_name) as zf:
                      zf.extractall()
 
-   def upload(self, gcs_ul_path: str, local_name: str):
+   def upload(self, gcs_ul_path: str, local_name: str, zip_flag = False):
+       if(zip_flag):
+            with zipfile.ZipFile(local_name + ".zip", 'w') as zf:
+                 zf.write(local_name, compress_type = zipfile.ZIP_DEFLATED)
+                 local_name = local_name + ".zip"
        blob = self.bucket.blob(gcs_ul_path)
        blob.upload_from_filename(local_name)
        print(f"{local_name}をアップロードしました")
