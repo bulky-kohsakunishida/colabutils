@@ -121,7 +121,7 @@ def download_keys(gcsutils: GcsUtils) -> None:
     :param gcsutils: GcsUtils instance
     :return: None
     """
-    keyfile = 'bulkyadkey.zip'
+    keyfile = 'bulkyadkeys.zip'
     gcsutils.download(keyfile, keyfile, exist_ok=True, unzip_flag=True)
 
     subprocess.run('mkdir -p /root/.ssh', shell=True,
