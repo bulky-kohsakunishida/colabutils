@@ -37,13 +37,13 @@ class GcsUtils:
         zf = zipfile.ZipFile(zip_name + ".zip", 'w')
         zf.write(local_name, zip_name, compress_type=zipfile.ZIP_DEFLATED)
         zf.close()
-        self.upload(gcs_ul_path, zip_name + ".zip")
+        self.upload(zip_name + ".zip", gcs_ul_path)
 
     def output_upload(self, result_dir, model_name, check_point_file, learning_rate, max_itr):
         if os.path.exists(check_point_file):
             os.remove(check_point_file)
 
-        _results_file = self.__prepare_upload(learning_rate, max_itr)
+        _results_file = self.__train_prepare_upload(learning_rate, max_itr)
 
         # 重みファイル
         self._weight_name = _results_file + '.pth'
@@ -58,14 +58,32 @@ class GcsUtils:
 
         self.upload(self._result_file_zip, os.path.join(self.result_path, self._result_file_zip))
 
-    def __prepare_upload(self, learning_rate, max_itr):
+    def __train_prepare_upload(self, learning_rate, max_itr):
         # タイムゾーンの生成
         JST = timezone(timedelta(hours=+9), 'JST')
         tdatetime = datetime.now(JST)
         date_stirngs = tdatetime.strftime('%Y%m%d')
         time_strings = tdatetime.strftime('%H%M')
-        results_file = date_stirngs + '_' + time_strings + '_' + "results_train" + '_' + self.work_name + '_' + f"{learning_rate:.0e}" + '_' + str(
-            max_itr)
+        results_file = date_stirngs + '_' + time_strings + '_' + "results_train" + '_' + self.work_name + '_' + f"{learning_rate:.0e}" + '_' + str(max_itr)
+
+        return results_file
+
+    def inference_upload(self, result_dir, thresh_hold):
+
+        _results_file = self.__inference_prepare_upload(thresh_hold)
+
+        # predict_images フォルダのzip
+        self._result_file_zip = _results_file + '.zip'
+
+        self.zip_upload(result_dir, os.path.join(self.result_path, self._result_file_zip), _results_file)
+
+    def __inference_prepare_upload(self, thresh_hold):
+        # タイムゾーンの生成
+        JST = timezone(timedelta(hours=+9), 'JST')
+        tdatetime = datetime.now(JST)
+        date_stirngs = tdatetime.strftime('%Y%m%d')
+        time_strings = tdatetime.strftime('%H%M')
+        results_file = date_stirngs + '_' + time_strings + '_' + "results_inference" + '_' + self.work_name + '_th' + str(thresh_hold)
 
         return results_file
 
