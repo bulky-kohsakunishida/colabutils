@@ -180,7 +180,7 @@ class GcsUtils:
         return results_file
 
     def __compress_dir(self, zip_out: Path, directory: Path, skipped_names: Iterable[str]):
-         """
+        """
         <__compress_dir>
             指定されたファイルをzip形式で圧縮する。
         Args:
@@ -210,7 +210,7 @@ class GcsUtils:
                     print('Added: "{}".'.format(f))
 
     def __iter_all_files(self, directory: Path) -> List[Path]:
-         """
+        """
         <__iter_all_files>
             指定されたディレクトリの下にあるすべてのファイル（ Path ）を下層のものも含めて返すイテレータを返す。
         Args:
